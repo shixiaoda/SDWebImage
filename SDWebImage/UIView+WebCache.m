@@ -21,6 +21,9 @@ static char TAG_ACTIVITY_STYLE;
 #endif
 static char TAG_ACTIVITY_SHOW;
 
+NSString *const _SDWebImageFadeAnimationKey = @"SDWebImageFade";
+const NSTimeInterval _SDWebImageFadeTime = 0.2;
+
 @implementation UIView (WebCache)
 
 - (nullable NSURL *)sd_imageURL {
@@ -40,7 +43,7 @@ static char TAG_ACTIVITY_SHOW;
     
     if (!(options & SDWebImageDelayPlaceholder)) {
         dispatch_main_async_safe(^{
-            [self sd_setImage:placeholder imageData:nil basedOnClassOrViaCustomSetImageBlock:setImageBlock];
+            [self sd_setImage:placeholder imageData:nil showFade:NO basedOnClassOrViaCustomSetImageBlock:setImageBlock ];
         });
     }
     
@@ -61,15 +64,20 @@ static char TAG_ACTIVITY_SHOW;
                 if (!sself) {
                     return;
                 }
+                BOOL showFade = (options & SDWebImageSetImageWithFadeAnimation);
+                if (showFade &&
+                    !(options & SDWebImageAvoidAutoSetImage)) {
+                    [self.layer removeAnimationForKey:_SDWebImageFadeAnimationKey];
+                }
                 if (image && (options & SDWebImageAvoidAutoSetImage) && completedBlock) {
                     completedBlock(image, error, cacheType, url);
                     return;
                 } else if (image) {
-                    [sself sd_setImage:image imageData:data basedOnClassOrViaCustomSetImageBlock:setImageBlock];
+                    [sself sd_setImage:image imageData:data showFade:showFade basedOnClassOrViaCustomSetImageBlock:setImageBlock];
                     [sself sd_setNeedsLayout];
                 } else {
                     if ((options & SDWebImageDelayPlaceholder)) {
-                        [sself sd_setImage:placeholder imageData:nil basedOnClassOrViaCustomSetImageBlock:setImageBlock];
+                        [sself sd_setImage:placeholder imageData:nil showFade:showFade basedOnClassOrViaCustomSetImageBlock:setImageBlock];
                         [sself sd_setNeedsLayout];
                     }
                 }
@@ -94,7 +102,7 @@ static char TAG_ACTIVITY_SHOW;
     [self sd_cancelImageLoadOperationWithKey:NSStringFromClass([self class])];
 }
 
-- (void)sd_setImage:(UIImage *)image imageData:(NSData *)imageData basedOnClassOrViaCustomSetImageBlock:(SDSetImageBlock)setImageBlock {
+- (void)sd_setImage:(UIImage *)image imageData:(NSData *)imageData showFade:(BOOL)showFade  basedOnClassOrViaCustomSetImageBlock:(SDSetImageBlock)setImageBlock {
     if (setImageBlock) {
         setImageBlock(image, imageData);
         return;
@@ -103,6 +111,14 @@ static char TAG_ACTIVITY_SHOW;
 #if SD_UIKIT || SD_MAC
     if ([self isKindOfClass:[UIImageView class]]) {
         UIImageView *imageView = (UIImageView *)self;
+        if (showFade) {
+            CATransition *transition = [CATransition animation];
+            transition.duration = _SDWebImageFadeTime;
+            transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            transition.type = kCATransitionFade;
+            [self.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
+        }
+
         imageView.image = image;
     }
 #endif
@@ -110,6 +126,13 @@ static char TAG_ACTIVITY_SHOW;
 #if SD_UIKIT
     if ([self isKindOfClass:[UIButton class]]) {
         UIButton *button = (UIButton *)self;
+        if (showFade) {
+            CATransition *transition = [CATransition animation];
+            transition.duration = _SDWebImageFadeTime;
+            transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            transition.type = kCATransitionFade;
+            [self.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
+        }
         [button setImage:image forState:UIControlStateNormal];
     }
 #endif

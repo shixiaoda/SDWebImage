@@ -14,6 +14,9 @@
 
 typedef void(^SDSetImageBlock)(UIImage * _Nullable image, NSData * _Nullable imageData);
 
+extern NSString *const _SDWebImageFadeAnimationKey;
+extern const NSTimeInterval _SDWebImageFadeTime;
+
 @interface UIView (WebCache)
 
 /**

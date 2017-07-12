@@ -40,12 +40,20 @@
           placeholderImage:(nullable UIImage *)placeholder
                    options:(SDWebImageOptions)options
                  completed:(nullable SDExternalCompletionBlock)completedBlock {
+    BOOL showFade = (options & SDWebImageSetImageWithFadeAnimation);
     __weak typeof(self)weakSelf = self;
     [self sd_internalSetImageWithURL:url
                     placeholderImage:placeholder
                              options:options
                         operationKey:nil
                        setImageBlock:^(UIImage *image, NSData *imageData) {
+                           if (showFade) {
+                               CATransition *transition = [CATransition animation];
+                               transition.duration = _SDWebImageFadeTime;
+                               transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                               transition.type = kCATransitionFade;
+                               [weakSelf.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
+                           }
                            weakSelf.image = image;
                        }
                             progress:nil

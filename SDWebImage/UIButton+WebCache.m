@@ -114,12 +114,21 @@ typedef NSMutableDictionary<NSNumber *, NSURL *> SDStateImageURLDictionary;
     
     self.imageURLStorage[@(state)] = url;
     
+    BOOL showFade = (options & SDWebImageSetImageWithFadeAnimation);
+    
     __weak typeof(self)weakSelf = self;
     [self sd_internalSetImageWithURL:url
                     placeholderImage:placeholder
                              options:options
                         operationKey:[NSString stringWithFormat:@"UIButtonBackgroundImageOperation%@", @(state)]
                        setImageBlock:^(UIImage *image, NSData *imageData) {
+                           if (showFade) {
+                               CATransition *transition = [CATransition animation];
+                               transition.duration = _SDWebImageFadeTime;
+                               transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                               transition.type = kCATransitionFade;
+                               [weakSelf.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
+                           }
                            [weakSelf setBackgroundImage:image forState:state];
                        }
                             progress:nil
