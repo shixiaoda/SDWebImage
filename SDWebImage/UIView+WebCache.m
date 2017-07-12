@@ -67,7 +67,7 @@ const NSTimeInterval _SDWebImageFadeTime = 0.2;
                 BOOL showFade = (options & SDWebImageSetImageWithFadeAnimation);
                 if (showFade &&
                     !(options & SDWebImageAvoidAutoSetImage)) {
-                    [self.layer removeAnimationForKey:_SDWebImageFadeAnimationKey];
+                    [sself.layer removeAnimationForKey:_SDWebImageFadeAnimationKey];
                 }
                 if (image && (options & SDWebImageAvoidAutoSetImage) && completedBlock) {
                     completedBlock(image, error, cacheType, url);
@@ -116,7 +116,7 @@ const NSTimeInterval _SDWebImageFadeTime = 0.2;
             transition.duration = _SDWebImageFadeTime;
             transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
             transition.type = kCATransitionFade;
-            [self.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
+            [imageView.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
         }
 
         imageView.image = image;
@@ -131,7 +131,7 @@ const NSTimeInterval _SDWebImageFadeTime = 0.2;
             transition.duration = _SDWebImageFadeTime;
             transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
             transition.type = kCATransitionFade;
-            [self.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
+            [button.layer addAnimation:transition forKey:_SDWebImageFadeAnimationKey];
         }
         [button setImage:image forState:UIControlStateNormal];
     }
